@@ -1,0 +1,26 @@
+{
+  "name": "p-hero-a10-server",
+  "version": "1.0.0",
+  "description": "Digital Life Lessons Express API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "better-auth": "^1.7.6",
+    "@better-auth/mongo-adapter": "^1.7.6",
+    "mongodb": "^7.6.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
