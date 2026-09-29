@@ -20,6 +20,27 @@ separately as a persistent Node service, with the same MongoDB and auth secret
 as before to preserve existing accounts/sessions. Never put credentials in
 NEXT_PUBLIC_ variables. Do not expose a public wildcard CORS origin.
 
+## Lesson management
+
+Authenticated users can GET/POST `/api/my-lessons` and GET/PATCH/DELETE
+`/api/my-lessons/:id`. The server sets ownership and validates all editable fields.
+Edits/deletes require ownership or admin role; premium access changes require
+premium membership. Deleting a lesson removes its comments, favorites, and reports.
+
+## My Favorites
+
+GET `/api/my-favorites?category=Career&tone=Gratitude&page=1` lists only
+the signed-in user’s saved lessons, ten per page. DELETE `/api/my-favorites/:id`
+removes only that user’s save, even if the lesson has become unavailable.
+Private lesson metadata and premium stories are never returned by this endpoint.
+
+## Profile
+
+GET `/api/profile?page=1` returns the signed-in user’s public account fields,
+lesson/favorite counts, and their public lessons sorted newest first. Profile
+updates use Better Auth `/api/auth/update-user`, restricted to validated name and
+photo fields. Email, role, membership, and user ID cannot be changed there.
+
 ## Endpoints
 
 - GET `/api/health`
@@ -47,6 +68,6 @@ Packages: Express, cors, dotenv, Better Auth, its MongoDB adapter, mongodb.
 Read-only MongoDB query fixtures (no inserted records):
 `RUN_MONGO_TESTS=1 node --env-file=.env --test tests/public-lessons.test.mjs`
 
-CRUD dashboards, Stripe, admin moderation are remaining
+Stripe and admin moderation are remaining
 features. This migration preserves the existing database; it does not create
 sample lessons or change user roles.
