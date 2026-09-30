@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { images } from "./routes/images.js"
 import express from "express"
 import cors from "cors"
@@ -37,3 +38,6 @@ app.use((error, req, res, next) => {
   const status = error.type === "entity.parse.failed" ? 400 : error.type === "entity.too.large" ? 413 : 503
   res.status(status).json({ error: status === 400 ? "Invalid JSON request." : status === 413 ? "Request is too large." : "The service is temporarily unavailable. Please try again." })
 })
+
+// Vercel imports this entry point as a request handler.
+export default app
