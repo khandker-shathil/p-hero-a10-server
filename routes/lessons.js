@@ -20,16 +20,16 @@ lessons.get("/", async (req, res) => {
   const filters = parseLessonFilters(new URL(req.originalUrl, "http://localhost").searchParams)
   res.json(await browsePublicLessons(await getDatabase(), filters, session?.user))
 })
-// Every detail/engagement operation verifies the session and content access anew.
+// Guests can read free public lessons; all writes require a session.
 lessons.use("/:id", async (req, res, next) => {
   const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) })
-  if (!session) return res.status(401).json({ error: "Please log in to read this lesson." })
+  if (!session && !["GET", "HEAD"].includes(req.method)) return res.status(401).json({ error: "Please log in to interact with this lesson." })
   if (req.params.id.length > 128) return res.status(404).json({ error: "Lesson not found." })
   const db = await getDatabase()
   const lesson = await db.collection("lessons").findOne(idFilter(req.params.id))
-  const status = lessonAccess(lesson, session.user)
-  if (status !== 200) return res.status(status).json({ error: status === 403 ? "Upgrade to Premium to read this lesson." : "Lesson not found." })
-  req.viewer = session.user
+  const status = lessonAccess(lesson, session?.user)
+  if (status !== 200) return res.status(status).json({ error: status === 401 ? "Please log in to access premium lessons." : status === 403 ? "Upgrade to Premium to read this lesson." : "Lesson not found." })
+  req.viewer = session?.user
   req.lesson = lesson
   req.db = db
   next()
@@ -43,7 +43,7 @@ async function engagement(db, lesson, user) {
   ])
   const savers = new Set(savedBy.map(x => String(x.userId)))
   const likes = [...new Set((fresh?.likes || []).map(String))]
-  return { likesCount: likes.length, liked: likes.includes(String(user.id)), savesCount: savers.size, saved: savers.has(String(user.id)) }
+  return { likesCount: likes.length, liked: !!user && likes.includes(String(user.id)), savesCount: savers.size, saved: !!user && savers.has(String(user.id)) }
 }
 
 lessons.get("/:id", async (req, res) => {

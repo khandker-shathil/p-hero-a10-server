@@ -41,7 +41,21 @@ test("Express detail routes enforce permissions and validate engagement", async 
     return fetch(`${base}/api/lessons/lesson-1${path}`, { method, headers: { Origin: origin, "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}) })
   }
   try {
+    const guest = await request()
+    assert.equal(guest.status, 200)
+    const guestBody = await guest.json()
+    assert.equal(guestBody.lesson.description, lesson.description)
+    assert.equal(guestBody.lesson.liked, false)
+    assert.equal(guestBody.lesson.saved, false)
+    assert.equal((await request("/comments")).status, 200)
+    for (const [path, method] of [["/like", "POST"], ["/favorite", "PUT"], ["/favorite", "DELETE"], ["/comments", "POST"], ["/reports", "POST"]]) {
+      assert.equal((await request(path, method, {})).status, 401)
+    }
+    lesson.visibility = "private"
+    assert.equal((await request()).status, 404)
+    lesson.visibility = "public"; lesson.accessLevel = "premium"
     assert.equal((await request()).status, 401)
+    lesson.accessLevel = "free"
     user = { id: "reader", email: "reader@example.com", isPremium: false }
     const response = await request()
     assert.equal(response.status, 200)

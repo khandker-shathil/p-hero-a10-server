@@ -1,3 +1,4 @@
+import { admin } from "./routes/admin.js"
 import "dotenv/config"
 import { images } from "./routes/images.js"
 import express from "express"
@@ -16,7 +17,6 @@ const origin = new URL(process.env.CLIENT_URL || "http://localhost:3000").origin
 app.disable("x-powered-by")
 app.use(cors({ origin, credentials: true, methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] }))
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "digital-life-lessons-api" }))
-// Better Auth must receive the unparsed request body.
 app.all("/api/auth/{*path}", toNodeHandler(auth))
 app.use(express.json({ limit: "32kb" }))
 app.use((req, res, next) => {
@@ -26,6 +26,7 @@ app.use((req, res, next) => {
   next()
 })
 app.use("/api/images", images)
+app.use("/api/admin", admin)
 app.get("/api/home", home)
 app.get("/api/profile", profile)
 app.use("/api/lessons", lessons)
@@ -39,5 +40,4 @@ app.use((error, req, res, next) => {
   res.status(status).json({ error: status === 400 ? "Invalid JSON request." : status === 413 ? "Request is too large." : "The service is temporarily unavailable. Please try again." })
 })
 
-// Vercel imports this entry point as a request handler.
 export default app

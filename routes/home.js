@@ -1,8 +1,5 @@
 import { getDatabase } from "../lib/db.js"
 
-
-
-// Public projections must never return private lessons or premium story text.
 const authorLookup = [
   {
     $lookup: {
