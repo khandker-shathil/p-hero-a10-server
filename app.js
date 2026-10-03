@@ -1,3 +1,4 @@
+import { billing, stripeWebhook } from "./routes/billing.js"
 import { admin } from "./routes/admin.js"
 import "dotenv/config"
 import { images } from "./routes/images.js"
@@ -18,6 +19,7 @@ app.disable("x-powered-by")
 app.use(cors({ origin, credentials: true, methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] }))
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "digital-life-lessons-api" }))
 app.all("/api/auth/{*path}", toNodeHandler(auth))
+app.post("/api/stripe/webhook", express.raw({ type: "application/json", limit: "1mb" }), stripeWebhook)
 app.use(express.json({ limit: "32kb" }))
 app.use((req, res, next) => {
   if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && req.headers.origin !== origin) {
@@ -25,6 +27,7 @@ app.use((req, res, next) => {
   }
   next()
 })
+app.use("/api/billing", billing)
 app.use("/api/images", images)
 app.use("/api/admin", admin)
 app.get("/api/home", home)
