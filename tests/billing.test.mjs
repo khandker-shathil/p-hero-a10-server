@@ -49,8 +49,8 @@ test("subscription lifecycle updates are scoped to the linked subscription", asy
   assert.equal(writes.length, 2)
 })
 test("activation requires a session and webhook verifies signatures before accepting events", async () => {
-  const previous = { session: auth.api.getSession, key: process.env.STRIPE_SECRET_KEY, webhook: process.env.STRIPE_WEBHOOK_SECRET }
-  process.env.STRIPE_SECRET_KEY = "sk_test_fixture"
+  const previous = { session: auth.api.getSession, key: process.env.BILLING_SECRET_KEY, webhook: process.env.STRIPE_WEBHOOK_SECRET }
+  process.env.BILLING_SECRET_KEY = "sk_test_fixture"
   process.env.STRIPE_WEBHOOK_SECRET = "whsec_fixture"
   let loggedIn = false
   auth.api.getSession = async () => loggedIn ? { user: { id: "reader" } } : null
@@ -74,7 +74,7 @@ test("activation requires a session and webhook verifies signatures before accep
   } finally {
     await new Promise(resolve => server.close(resolve))
     auth.api.getSession = previous.session
-    for (const [name, value] of [["STRIPE_SECRET_KEY", previous.key], ["STRIPE_WEBHOOK_SECRET", previous.webhook]]) {
+    for (const [name, value] of [["BILLING_SECRET_KEY", previous.key], ["STRIPE_WEBHOOK_SECRET", previous.webhook]]) {
       if (value === undefined) delete process.env[name]; else process.env[name] = value
     }
   }

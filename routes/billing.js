@@ -20,7 +20,7 @@ billing.post("/activate", async (req, res) => {
 })
 
 export async function stripeWebhook(req, res) {
-  if (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: "Stripe webhooks are not configured." })
+  if (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.BILLING_SECRET_KEY) return res.status(503).json({ error: "Stripe webhooks are not configured." })
   const stripe = stripeClient()
   let event
   try { event = stripe.webhooks.constructEvent(req.body, req.get("stripe-signature"), process.env.STRIPE_WEBHOOK_SECRET) }
